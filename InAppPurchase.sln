@@ -1,0 +1,86 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InAppPurchase.iOS", "InAppPurchase.iOS\InAppPurchase.iOS.csproj", "{6224900A-1CC1-4D32-B45E-0681B9AB8C69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InAppPurchase", "InAppPurchase\InAppPurchase.csproj", "{77C1A760-C39E-426B-A2EE-41DCB1D7C475}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InAppPurchase.Android", "InAppPurchase.Android\InAppPurchase.Android.csproj", "{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.iOS", "Sample.iOS\Sample.iOS.csproj", "{C08F2761-5415-4335-92C3-F4AD33F21EDE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solutions Items", "Solutions Items", "{09CA11F0-61E6-458A-86CF-F427B518A62D}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+		License.md = License.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|iPhoneSimulator = Debug|iPhoneSimulator
+		Release|iPhoneSimulator = Release|iPhoneSimulator
+		Debug|iPhone = Debug|iPhone
+		Release|iPhone = Release|iPhone
+		Ad-Hoc|iPhone = Ad-Hoc|iPhone
+		AppStore|iPhone = AppStore|iPhone
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.Ad-Hoc|iPhone.ActiveCfg = Release|Any CPU
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.Ad-Hoc|iPhone.Build.0 = Release|Any CPU
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.AppStore|iPhone.ActiveCfg = Release|Any CPU
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.AppStore|iPhone.Build.0 = Release|Any CPU
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.Release|iPhone.Build.0 = Release|Any CPU
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{6224900A-1CC1-4D32-B45E-0681B9AB8C69}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.Ad-Hoc|iPhone.ActiveCfg = Release|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.Ad-Hoc|iPhone.Build.0 = Release|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.AppStore|iPhone.ActiveCfg = Release|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.AppStore|iPhone.Build.0 = Release|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.Release|iPhone.Build.0 = Release|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{77C1A760-C39E-426B-A2EE-41DCB1D7C475}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.Ad-Hoc|iPhone.ActiveCfg = Ad-Hoc|iPhone
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.Ad-Hoc|iPhone.Build.0 = Ad-Hoc|iPhone
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.AppStore|iPhone.ActiveCfg = AppStore|iPhone
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.AppStore|iPhone.Build.0 = AppStore|iPhone
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.Debug|iPhone.ActiveCfg = Debug|iPhone
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.Debug|iPhone.Build.0 = Debug|iPhone
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.Debug|iPhoneSimulator.Build.0 = Debug|iPhoneSimulator
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.Release|iPhone.ActiveCfg = Release|iPhone
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.Release|iPhone.Build.0 = Release|iPhone
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
+		{C08F2761-5415-4335-92C3-F4AD33F21EDE}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.Ad-Hoc|iPhone.ActiveCfg = Release|Any CPU
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.Ad-Hoc|iPhone.Build.0 = Release|Any CPU
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.AppStore|iPhone.ActiveCfg = Release|Any CPU
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.AppStore|iPhone.Build.0 = Release|Any CPU
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.Release|iPhone.Build.0 = Release|Any CPU
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{E0BE54A6-05DB-4BBF-8859-DD902FF712C3}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Sample.iOS\Sample.iOS.csproj
+		Policies = $0
+		$0.StandardHeader = $1
+		$1.Text = @  \n  Copyright 2013 Sleiman Zublidi\n  \n  Licensed under the Apache License, Version 2.0 (the "License");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n     http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an "AS IS" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n
+		$1.IncludeInNewFiles = True
+	EndGlobalSection
+EndGlobal
