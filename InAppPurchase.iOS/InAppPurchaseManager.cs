@@ -22,6 +22,7 @@ using MonoTouch.StoreKit;
 
 namespace InAppPurchase
 {
+    [Preserve]
     public sealed class InAppPurchaseManager : InAppPurchaseManagerBase, IInAppPurchaseManager
     {
         #region Singleton
@@ -61,6 +62,9 @@ namespace InAppPurchase
             public SKProduct Product { get; set; }
         }
 
+        private SKProductsRequest productsRequest;
+        private ProductsRequestDelegate productsRequestDelegate;
+
         public override void RequestProductInformation(string[] productIds, ProductInformationDelegate onSucceed, RequestFailedDelegate onFailed)
         {   
             if (productIds == null || productIds.Length == 0)
@@ -72,8 +76,22 @@ namespace InAppPurchase
                 products[i] = new NSString(productIds[i]);
             }
             NSSet productIdentifiers = NSSet.MakeNSObjectSet<NSString>(products);
-            SKProductsRequest productsRequest = new SKProductsRequest(productIdentifiers);
-            productsRequest.Delegate = new ProductsRequestDelegate(onSucceed, onFailed);
+
+            if (productsRequestDelegate != null)
+            {
+                productsRequestDelegate.Dispose();
+                productsRequestDelegate = null;
+            }
+            productsRequestDelegate = new ProductsRequestDelegate(onSucceed, onFailed);
+
+            if (productsRequest != null)
+            {
+                productsRequest.Dispose();
+                productsRequest = null;
+            }
+
+            productsRequest = new SKProductsRequest(productIdentifiers);
+            productsRequest.Delegate = productsRequestDelegate;
             productsRequest.Start();
         }
 
@@ -90,33 +108,48 @@ namespace InAppPurchase
 
             public override void ReceivedResponse(SKProductsRequest request, SKProductsResponse response)
             {
-                List<ProductInformation> products = new List<ProductInformation>();
-
-                foreach (SKProduct product in response.Products)
+                if (response == null && onFailed != null)
                 {
-                    SKProductInformation pi = new SKProductInformation(product);
-                    pi.Title = product.LocalizedTitle;
-                    pi.Description = product.Description;
-                    pi.Price = product.Price.FloatValue;
-                    pi.LocalizedPrice = product.LocalizedPrice();
-                    pi.IsDownloadable = product.Downloadable;
-                    pi.DownloadContentVersion = product.DownloadContentVersion;
-                    products.Add(pi);
+                    onFailed(new InAppPurchaseException("Invalid response", 0));
+                    Console.WriteLine("InAppPurchaseManager: ReceivedResponse: SKProductsResponse is null!");
                 }
-
-                if (onSucceed != null)
+                else
                 {
-                    onSucceed(products.ToArray(), response.InvalidProducts);
-                }
+                    List<ProductInformation> products = new List<ProductInformation>();
 
-                request.Dispose();
+                    foreach (SKProduct product in response.Products)
+                    {
+                        SKProductInformation pi = new SKProductInformation(product);
+                        pi.Title = product.LocalizedTitle;
+                        pi.Description = product.Description;
+                        pi.Price = product.Price.FloatValue;
+                        pi.LocalizedPrice = product.LocalizedPrice();
+                        pi.IsDownloadable = product.Downloadable;
+                        pi.DownloadContentVersion = product.DownloadContentVersion;
+                        products.Add(pi);
+                    }
+
+                    if (onSucceed != null)
+                    {
+                        onSucceed(products.ToArray(), response.InvalidProducts);
+                    }
+                }
             }
 
             public override void RequestFailed(SKRequest request, NSError error)
             {
                 if (onFailed != null)
                 {
-                    onFailed(new InAppPurchaseException(error.LocalizedDescription, error.Code));
+                    if (error != null)
+                    {
+                        onFailed(new InAppPurchaseException(error.LocalizedDescription, error.Code));
+                        Console.WriteLine("InAppPurchaseManager: RequestFailed: {0}", error.LocalizedDescription);
+                    }
+                    else
+                    {
+                        onFailed(new InAppPurchaseException("Uknown Error", 0));
+                        Console.WriteLine("InAppPurchaseManager: RequestFailed: NSError is null!");
+                    }
                 }
             }
         }
@@ -187,6 +220,7 @@ namespace InAppPurchase
             if (IsInitalized == false) 
             {
                 OnPurchaseFailed(new InAppPurchaseException("InAppPurchaseManager is not initialized." , 0));
+                return;
             }
 
             SKProductInformation pi = productDictionary[productId] as SKProductInformation;
@@ -202,11 +236,20 @@ namespace InAppPurchase
 
         public override void RestorePurshases()
         {
+            if (observer == null)
+            {
+                observer = new PaymentTransactionObserver(this);
+                SKPaymentQueue.DefaultQueue.AddTransactionObserver(observer);
+            }
+
             SKPaymentQueue.DefaultQueue.RestoreCompletedTransactions();
         }
 
         private void PurchaseProduct(SKProduct product, int quantity)
         {
+            if (product == null)
+                throw new ArgumentNullException("InAppPurchaseManager: Product is not valid.");
+
             if (observer == null)
             {
                 observer = new PaymentTransactionObserver(this);
@@ -224,7 +267,10 @@ namespace InAppPurchase
                 SKPayment payment = SKPayment.PaymentWithProduct(product);
                 SKPaymentQueue.DefaultQueue.AddPayment(payment);
             }
+
+            Console.WriteLine("");
         }
+
 
         private void CompleteTransaction(SKPaymentTransaction transaction)
         {
@@ -240,7 +286,7 @@ namespace InAppPurchase
         {
             if (transaction.Error.Code == 2)
             {
-                OnPurchaseFailed(new InAppPurchaseException("Payment was CANCELLED by user.", transaction.Error.Code));
+                OnPurchaseFailed(new InAppPurchaseException("Payment was CANCELLED.", transaction.Error.Code));
             }
             else
             {
@@ -251,20 +297,23 @@ namespace InAppPurchase
 
         private void FinishTransaction(SKPaymentTransaction transaction, bool wasSuccessful)
         {
-            SKPaymentQueue.DefaultQueue.FinishTransaction(transaction);  // THIS IS IMPORTANT - LET'S APPLE KNOW WE'RE DONE !!!!
+            if (transaction == null)
+                throw new ArgumentNullException("InAppPurchaseManager: Transaction is not valid.");
 
+            SKPaymentQueue.DefaultQueue.FinishTransaction(transaction);  // THIS IS IMPORTANT - LET'S APPLE KNOW WE'RE DONE !!!!
+            
             if (wasSuccessful)
             {
                 string productId = transaction.Payment.ProductIdentifier;
                 int quantity = transaction.Payment.Quantity;
-
+            
                 if (transaction.OriginalTransaction != null)
                 {
                     productId = transaction.OriginalTransaction.Payment.ProductIdentifier;
                     quantity = transaction.OriginalTransaction.Payment.Quantity;
                 }
-
-                IProductInformation product = productDictionary[productId];
+            
+                IProductInformation product = productDictionary [productId];
                 OnPurchaseSucceed(product, quantity);
             }
         }
