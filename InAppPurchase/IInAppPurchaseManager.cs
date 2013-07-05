@@ -37,10 +37,14 @@ namespace InAppPurchase
 
         void PurchaseProduct(string productId);
         void PurchaseProduct(string productId, int quantity);
-        void RestorePurshases();
 
         event PurchaseSucceedDelegate PurchaseSucceed;
         event PurchaseFailedDelegate PurchaseFailed;
+
+        void RestorePurshases();
+
+        event RestoreSucceedDelegate RestoreSucceed;
+        event RestoreFailedDelegate RestoreFailed;
     }
 }
 

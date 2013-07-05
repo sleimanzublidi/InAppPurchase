@@ -10,5 +10,8 @@ namespace InAppPurchase
 
     public delegate void PurchaseSucceedDelegate(IProductInformation product, int quantity);
     public delegate void PurchaseFailedDelegate(InAppPurchaseException error);
+
+    public delegate void RestoreSucceedDelegate();
+    public delegate void RestoreFailedDelegate(InAppPurchaseException error);
 }
 

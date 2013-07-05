@@ -241,7 +241,6 @@ namespace InAppPurchase
                 observer = new PaymentTransactionObserver(this);
                 SKPaymentQueue.DefaultQueue.AddTransactionObserver(observer);
             }
-
             SKPaymentQueue.DefaultQueue.RestoreCompletedTransactions();
         }
 
@@ -313,8 +312,25 @@ namespace InAppPurchase
                     quantity = transaction.OriginalTransaction.Payment.Quantity;
                 }
             
-                IProductInformation product = productDictionary [productId];
+                IProductInformation product = productDictionary[productId];
                 OnPurchaseSucceed(product, quantity);
+            }
+        }
+
+        private void CompleteRestore()
+        {
+            OnRestoreSucceed();
+        }
+
+        private void FailedRestore(NSError error)
+        {
+            if (error == null)
+            {
+                OnRestoreFailed(new InAppPurchaseException("Error is null", 0));
+            }
+            else
+            {
+                OnRestoreFailed(new InAppPurchaseException(error.LocalizedDescription, error.Code));
             }
         }
 
@@ -353,12 +369,12 @@ namespace InAppPurchase
 
             public override void PaymentQueueRestoreCompletedTransactionsFinished(SKPaymentQueue queue)
             {
-
+                manager.CompleteRestore();
             }
 
             public override void RestoreCompletedTransactionsFailedWithError(SKPaymentQueue queue, NSError error)
             {
-
+                manager.FailedRestore(error);
             }
         } 
 

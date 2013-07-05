@@ -156,8 +156,6 @@ namespace InAppPurchase
 
         public abstract void PurchaseProduct(string productId, int quantity);
 
-        public abstract void RestorePurshases();
-
         public event PurchaseSucceedDelegate PurchaseSucceed;
         protected void OnPurchaseSucceed(IProductInformation product, int quantity)
         {
@@ -173,6 +171,26 @@ namespace InAppPurchase
             if (PurchaseFailed != null)
             {
                 PurchaseFailed(ex);
+            }
+        }
+
+        public abstract void RestorePurshases();
+
+        public event RestoreSucceedDelegate RestoreSucceed;
+        protected void OnRestoreSucceed()
+        {
+            if (RestoreSucceed != null)
+            {
+                RestoreSucceed();
+            }
+        }
+
+        public event RestoreFailedDelegate RestoreFailed;
+        protected void OnRestoreFailed(InAppPurchaseException ex)
+        {
+            if (RestoreFailed != null)
+            {
+                RestoreFailed(ex);
             }
         }
 
