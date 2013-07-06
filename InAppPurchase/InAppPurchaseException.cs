@@ -26,6 +26,12 @@ namespace InAppPurchase
             this.Code = code;
         }
 
+        public InAppPurchaseException(string message, int code, Exception innerException) 
+            : base(message, innerException)
+        {
+            this.Code = code;
+        }
+
         public int Code { get; private set; }
     }
 }

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MonoTouch.Foundation;
 using MonoTouch.StoreKit;
+using MonoTouch.UIKit;
 
 namespace InAppPurchase
 {
@@ -62,7 +63,6 @@ namespace InAppPurchase
             public SKProduct Product { get; set; }
         }
 
-        private SKProductsRequest productsRequest;
         private ProductsRequestDelegate productsRequestDelegate;
 
         public override void RequestProductInformation(string[] productIds, ProductInformationDelegate onSucceed, RequestFailedDelegate onFailed)
@@ -70,29 +70,32 @@ namespace InAppPurchase
             if (productIds == null || productIds.Length == 0)
                 throw new ArgumentException("InAppPurchaseManager: At least one product id is required.");
 
-            var products = new NSString[productIds.Length];
-            for (int i = 0; i < productIds.Length; i++)
+            try
             {
-                products[i] = new NSString(productIds[i]);
-            }
-            NSSet productIdentifiers = NSSet.MakeNSObjectSet<NSString>(products);
-
-            if (productsRequestDelegate != null)
+                var products = new NSString[productIds.Length];
+                for (int i = 0; i < productIds.Length; i++)
+                {
+                    products[i] = new NSString(productIds[i]);
+                }
+                NSSet productIdentifiers = NSSet.MakeNSObjectSet<NSString>(products);
+                
+                if (productsRequestDelegate == null)
+                {
+                    productsRequestDelegate = new ProductsRequestDelegate(onSucceed, onFailed);
+                }
+                
+                SKProductsRequest productsRequest = new SKProductsRequest(productIdentifiers);
+                productsRequest.Delegate = productsRequestDelegate;
+                productsRequest.Start();
+            } 
+            catch (Exception ex)
             {
-                productsRequestDelegate.Dispose();
-                productsRequestDelegate = null;
+                Console.WriteLine(ex.ToString());
+                if (onFailed != null)
+                {
+                    onFailed(new InAppPurchaseException("Error while requesting product information.", 0, ex));
+                }
             }
-            productsRequestDelegate = new ProductsRequestDelegate(onSucceed, onFailed);
-
-            if (productsRequest != null)
-            {
-                productsRequest.Dispose();
-                productsRequest = null;
-            }
-
-            productsRequest = new SKProductsRequest(productIdentifiers);
-            productsRequest.Delegate = productsRequestDelegate;
-            productsRequest.Start();
         }
 
         private class ProductsRequestDelegate : SKProductsRequestDelegate
@@ -108,30 +111,40 @@ namespace InAppPurchase
 
             public override void ReceivedResponse(SKProductsRequest request, SKProductsResponse response)
             {
-                if (response == null && onFailed != null)
+                try
                 {
-                    onFailed(new InAppPurchaseException("Invalid response", 0));
-                    Console.WriteLine("InAppPurchaseManager: ReceivedResponse: SKProductsResponse is null!");
-                }
-                else
-                {
-                    List<ProductInformation> products = new List<ProductInformation>();
-
-                    foreach (SKProduct product in response.Products)
+                    if (response == null && onFailed != null)
                     {
-                        SKProductInformation pi = new SKProductInformation(product);
-                        pi.Title = product.LocalizedTitle;
-                        pi.Description = product.Description;
-                        pi.Price = product.Price.FloatValue;
-                        pi.LocalizedPrice = product.LocalizedPrice();
-                        pi.IsDownloadable = product.Downloadable;
-                        pi.DownloadContentVersion = product.DownloadContentVersion;
-                        products.Add(pi);
+                        onFailed(new InAppPurchaseException("Invalid response", 0));
+                        Console.WriteLine("InAppPurchaseManager: ReceivedResponse: SKProductsResponse is null!");
                     }
-
-                    if (onSucceed != null)
+                    else
                     {
-                        onSucceed(products.ToArray(), response.InvalidProducts);
+                        List<ProductInformation> products = new List<ProductInformation>();
+                    
+                        foreach (SKProduct product in response.Products)
+                        {
+                            SKProductInformation pi = new SKProductInformation(product);
+                            pi.Title = product.LocalizedTitle;
+                            pi.Description = product.Description;
+                            pi.Price = product.Price.FloatValue;
+                            pi.LocalizedPrice = product.LocalizedPrice();
+                            //pi.IsDownloadable = product.Downloadable;
+                            //pi.DownloadContentVersion = product.DownloadContentVersion;
+                            products.Add(pi);
+                        }
+                    
+                        if (onSucceed != null)
+                        {
+                            onSucceed(products.ToArray(), response.InvalidProducts);
+                        }
+                    }
+                } 
+                catch (Exception ex)
+                {
+                    if (onFailed != null)
+                    {
+                        onFailed(new InAppPurchaseException("Error while requesting product information.", 0, ex));
                     }
                 }
             }
@@ -142,13 +155,13 @@ namespace InAppPurchase
                 {
                     if (error != null)
                     {
-                        onFailed(new InAppPurchaseException(error.LocalizedDescription, error.Code));
                         Console.WriteLine("InAppPurchaseManager: RequestFailed: {0}", error.LocalizedDescription);
+                        onFailed(new InAppPurchaseException(error.LocalizedDescription, error.Code));
                     }
                     else
                     {
-                        onFailed(new InAppPurchaseException("Uknown Error", 0));
                         Console.WriteLine("InAppPurchaseManager: RequestFailed: NSError is null!");
+                        onFailed(new InAppPurchaseException("Uknown Error", 0));
                     }
                 }
             }
@@ -163,35 +176,47 @@ namespace InAppPurchase
             if (productIds == null || productIds.Length == 0)
                 throw new ArgumentException("InAppPurchaseManager: At least one product id is required.");
 
-            IsInitalized = false;
-
-            RequestProductInformation(productIds, (products, invalidProductIds) =>
+            try
             {
-                foreach (var product in products) 
+                IsInitalized = false;
+                
+                RequestProductInformation(productIds, (products, invalidProductIds) =>
                 {
-                    productDictionary[product.ProductId] = product;
-                }
-
-                foreach (var id in invalidProductIds) 
+                    foreach (var product in products)
+                    {
+                        productDictionary[product.ProductId] = product;
+                    }
+                
+                    foreach (var id in invalidProductIds)
+                    {
+                        Console.WriteLine("InAppPurchaseManager: Product id '{0}' is not valid.", id);
+                        productDictionary[id] = new InvalidProductInformation(id);
+                    }
+                
+                    if (productDictionary.Count == 0)
+                    {
+                        OnInitializationFailed(new Exception("InAppPurchaseManager: There are not valid products."));
+                    }
+                    else
+                    {
+                        IsInitalized = true;
+                        if (onInitialized != null)
+                            onInitialized();
+                    }
+                }, 
+                ex => 
+                { 
+                    if (onFailed != null) onFailed(ex); 
+                });
+            } 
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                if (onFailed != null)
                 {
-                    Console.WriteLine("InAppPurchaseManager: Product id '{0}' is not valid.", id);
-                    productDictionary[id] = new InvalidProductInformation(id);
+                    onFailed(new InAppPurchaseException("Error initializing products.", 0, ex));
                 }
-
-                if (productDictionary.Count == 0)
-                {
-                    OnInitializationFailed(new Exception("InAppPurchaseManager: There are not valid products."));
-                }
-                else
-                {
-                    IsInitalized = true;
-                    if (onInitialized != null) onInitialized();
-                }
-            }, 
-            ex => 
-            { 
-                if (onFailed != null) onFailed(ex); 
-            });
+            }
         }
 
         #endregion
@@ -223,14 +248,22 @@ namespace InAppPurchase
                 return;
             }
 
-            SKProductInformation pi = productDictionary[productId] as SKProductInformation;
-            if (pi == null || pi.Product == null)
+            try
             {
-                OnPurchaseFailed(new InAppPurchaseException("Product is not valid." , 0));
-            }
-            else
+                SKProductInformation pi = productDictionary[productId] as SKProductInformation;
+                if (pi == null || pi.Product == null)
+                {
+                    OnPurchaseFailed(new InAppPurchaseException("Product is not valid.", 0));
+                }
+                else
+                {
+                    PurchaseProduct(pi.Product, quantity);
+                }
+            } 
+            catch (Exception ex)
             {
-                PurchaseProduct(pi.Product, quantity);
+                Console.WriteLine(ex.ToString());
+                OnPurchaseFailed(new InAppPurchaseException("Error executing in-app purchase.", 0, ex));
             }
         }
 
@@ -249,25 +282,31 @@ namespace InAppPurchase
             if (product == null)
                 throw new ArgumentNullException("InAppPurchaseManager: Product is not valid.");
 
-            if (observer == null)
+            try
             {
-                observer = new PaymentTransactionObserver(this);
-                SKPaymentQueue.DefaultQueue.AddTransactionObserver(observer);
-            }
-
-            if (quantity > 1)
+                if (observer == null)
+                {
+                    observer = new PaymentTransactionObserver(this);
+                    SKPaymentQueue.DefaultQueue.AddTransactionObserver(observer);
+                }
+                
+                if (quantity > 1)
+                {
+                    SKMutablePayment payment = SKMutablePayment.PaymentWithProduct(product);
+                    payment.Quantity = quantity;
+                    SKPaymentQueue.DefaultQueue.AddPayment(payment);
+                }
+                else
+                {
+                    SKPayment payment = SKPayment.PaymentWithProduct(product);
+                    SKPaymentQueue.DefaultQueue.AddPayment(payment);
+                }
+            } 
+            catch (Exception ex)
             {
-                SKMutablePayment payment = SKMutablePayment.PaymentWithProduct(product);
-                payment.Quantity = quantity;
-                SKPaymentQueue.DefaultQueue.AddPayment(payment);
+                Console.WriteLine(ex.ToString());
+                OnPurchaseFailed(new InAppPurchaseException("Error executing in-app purchase.", 0, ex));
             }
-            else
-            {
-                SKPayment payment = SKPayment.PaymentWithProduct(product);
-                SKPaymentQueue.DefaultQueue.AddPayment(payment);
-            }
-
-            Console.WriteLine("");
         }
 
 
@@ -377,6 +416,58 @@ namespace InAppPurchase
                 manager.FailedRestore(error);
             }
         } 
+
+        #endregion
+    
+        #region Events
+
+        protected override void OnInitialized()
+        {
+            UIApplication.SharedApplication.InvokeOnMainThread(delegate
+            {
+                base.OnInitialized();
+            });     
+        }
+
+        protected override void OnInitializationFailed(Exception ex)
+        {
+            UIApplication.SharedApplication.InvokeOnMainThread(delegate
+            {
+                base.OnInitializationFailed(ex);
+            });
+        }
+
+        protected override void OnPurchaseSucceed(IProductInformation product, int quantity)
+        {
+            UIApplication.SharedApplication.InvokeOnMainThread(delegate
+            {
+                base.OnPurchaseSucceed(product, quantity);
+            });
+        }
+
+        protected override void OnPurchaseFailed(InAppPurchaseException ex)
+        {
+            UIApplication.SharedApplication.InvokeOnMainThread(delegate
+            {
+                base.OnPurchaseFailed(ex);
+            });
+        }
+
+        protected override void OnRestoreSucceed()
+        {
+            UIApplication.SharedApplication.InvokeOnMainThread(delegate
+            {
+                base.OnRestoreSucceed();
+            });
+        }
+
+        protected override void OnRestoreFailed(InAppPurchaseException ex)
+        {
+            UIApplication.SharedApplication.InvokeOnMainThread(delegate
+            {
+                base.OnRestoreFailed(ex);
+            });
+        }
 
         #endregion
     }

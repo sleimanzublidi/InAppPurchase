@@ -114,7 +114,7 @@ namespace InAppPurchase
         public virtual void Initialize()
         {
             if (productDictionary.Count == 0)
-                throw new Exception("InAppPurchaseManager: At least one product id is required.");
+                throw new InAppPurchaseException("At least one product id is required.", 0);
 
             string[] productIds = productDictionary.Keys.ToArray();
             Initialize(productIds);
@@ -128,7 +128,7 @@ namespace InAppPurchase
         protected abstract void Initialize(string[] productIds, InitializatedDelegate onInitialized, InitializationFailedDelegate onFailed);
 
         public event InitializatedDelegate Initialized;
-        protected void OnInitialized()
+        protected virtual void OnInitialized()
         {
             if (Initialized != null)
             {
@@ -137,7 +137,7 @@ namespace InAppPurchase
         }
 
         public event InitializationFailedDelegate InitializationFailed;
-        protected void OnInitializationFailed(Exception ex)
+        protected virtual void OnInitializationFailed(Exception ex)
         {
             if (InitializationFailed != null)
             {
@@ -157,7 +157,7 @@ namespace InAppPurchase
         public abstract void PurchaseProduct(string productId, int quantity);
 
         public event PurchaseSucceedDelegate PurchaseSucceed;
-        protected void OnPurchaseSucceed(IProductInformation product, int quantity)
+        protected virtual void OnPurchaseSucceed(IProductInformation product, int quantity)
         {
             if (PurchaseSucceed != null)
             {
@@ -166,7 +166,7 @@ namespace InAppPurchase
         }
 
         public event PurchaseFailedDelegate PurchaseFailed;
-        protected void OnPurchaseFailed(InAppPurchaseException ex)
+        protected virtual void OnPurchaseFailed(InAppPurchaseException ex)
         {
             if (PurchaseFailed != null)
             {
@@ -177,7 +177,7 @@ namespace InAppPurchase
         public abstract void RestorePurshases();
 
         public event RestoreSucceedDelegate RestoreSucceed;
-        protected void OnRestoreSucceed()
+        protected virtual void OnRestoreSucceed()
         {
             if (RestoreSucceed != null)
             {
@@ -186,7 +186,7 @@ namespace InAppPurchase
         }
 
         public event RestoreFailedDelegate RestoreFailed;
-        protected void OnRestoreFailed(InAppPurchaseException ex)
+        protected virtual void OnRestoreFailed(InAppPurchaseException ex)
         {
             if (RestoreFailed != null)
             {
